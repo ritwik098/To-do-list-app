@@ -1,0 +1,94 @@
+<html lang="en">
+<head>
+	<script
+	  src="https://code.jquery.com/jquery-3.1.1.js"
+	  integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+	  crossorigin="anonymous"></script>
+	<meta charset="UTF-8">
+	<title>To-Do List</title>
+</head>
+<body>
+	<ul id='list'>
+	</ul>
+	<form id="addTodo" action="/sendItem" method="POST">
+		<input type="text" placeholder="Title" name="title">
+		<input type="text" placeholder="Description" name="description">
+		<input id="hiddenUserId" type="hidden" name="userId" >
+		<button type="submit" id="submit">Submit</button>
+	</form>
+	<br>
+	<button id="delete">Delete entries</button>
+	<button id="logout">Logout</button>
+	<script>
+		var user;
+		$( document ).ready(function() {
+	    	console.log( "ready!" );
+
+	    	$.get("/getCookies", function(data){
+				console.log(data);
+				user = data;
+				$('#hiddenUserId').attr("value",user.userId);
+				console.log(user);
+
+				$.post("/getTodos", { "userId": user['userId'] } , function(data){
+					console.log(data);
+					for(var i=0;i<data.length;i++){
+						console.log(data[i].title + ": " + data[i].description);
+						var s = "<li><input>" + data[i].title + ": " + data[i].description + "</li>";
+						$("#list").append(s);
+						var last = $("#list").find("input").last();
+						$(last).attr("type","checkbox");
+						$(last).attr("name","_id");
+						$(last).attr("value",data[i]._id);
+
+					}
+				},"json");
+			});
+			
+			
+			$("#addTodo").submit(function(e){
+	    	    e.preventDefault(); // Keep the form from submitting
+	        	var o = {};
+			    var a = $(this).serializeArray();
+			    console.log(a);
+			    a.forEach(function(value,index,item) {
+			        o[a[index].name] = a[index].value;
+			    });
+			    console.log(o);
+	        	$.post( $(this).attr('action'), o , function(data){
+	          		console.log(data);
+	          		//window.location = data.redirect; 
+	          		location.reload();
+	        	});
+	      	});
+
+				
+
+
+			$("#delete").on("click",function(){
+				var objects = [];
+				var check = $("#list").find('input[type="checkbox"]');
+				$(check).each(function(i,obj){
+					if($(this).prop("checked")==true){
+						objects.push($(this).val());
+						$(this).closest('li').remove();
+					}
+				});
+				$.post("/deleteTodo", { _id : objects }, function(data){
+					console.log(res.status);
+				},"json");
+			});
+
+			$('#logout').on("click", function(){
+				$.get("/logout",function(data){
+					console.log("in logout callback");
+					console.log(data);
+					window.location.replace('/');
+				});
+			});
+		});
+
+			
+	</script>
+</body>
+</html>

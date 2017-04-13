@@ -9,7 +9,7 @@ var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectID;
 var db;
 var usersLoggedIn = [];
-MongoClient.connect('mongodb://ritwik:pass@ds147069.mlab.com:47069/to-do-list',(err,database)=>{
+MongoClient.connect('*********************',(err,database)=>{
 	if(err){
 		console.log(err);
 	}
